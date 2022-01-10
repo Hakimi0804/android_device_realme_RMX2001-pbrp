@@ -55,8 +55,15 @@ service init-device-sh /system/bin/init.device.sh
     disabled
     seclabel u:r:recovery:s0
 
+service vendor.vibrator-default /vendor/bin/hw/android.hardware.vibrator-service.mediatek
+    user root
+    group root
+    disabled
+    seclabel u:r:recovery:s0
+
 on boot
     start init-device-sh
+    start vendor.vibrator-default
 
 on property:hwservicemanager.ready=true
     start hal_cryptoeng_oppo
