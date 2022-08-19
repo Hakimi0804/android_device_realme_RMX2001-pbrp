@@ -1,0 +1,56 @@
+# This is taken from https://github.com/Area69Lab/Recovery-Builder-NoKernel
+# All credits goes to above repo
+
+name: Recovery Compilation (realme 7)
+
+on:
+  workflow_dispatch:
+  watch:
+    types: [started]
+
+env:
+  MANIFEST: https://github.com/PitchBlackRecoveryProject/manifest_pb.git
+  MANIFEST_BRANCH: android-11.0
+  DEVICE: RMX2151
+  DT_LINK: https://github.com/Hakimi0804/android_device_realme_RMX2001-pbrp
+  DT_BRANCH: android-11.0-realme7
+  DT_PATH: device/realme/RMX2151
+  TARGET: pbrp
+  TZ: Asia/Kuala_Lumpur
+  TOKEN: ${{ secrets.TGBOT_TOKEN }}
+
+jobs:
+  build:
+    runs-on: ubuntu-18.04
+    steps:
+    - name: Checkout
+      uses: actions/checkout@master
+  
+    - name: Docker
+      run: docker rmi `docker images -q`
+
+    - name: Cleaning up runner
+      uses: rokibhasansagar/slimhub_actions@main
+ 
+    - name: Initializing environment
+      run: |
+        sudo rm -rf /usr/share/dotnet /etc/mysql /etc/php /etc/apt/sources.list.d
+        git config --global user.name "Hakimi0804"
+        git config --global user.email "hakimifirdaus944@gmail.com"
+        sudo -E apt-get clean
+        sudo -E apt-get -qq update
+        sudo -E apt-get -qq install bc build-essential zip curl libstdc++6 git wget python gcc clang libssl-dev repo rsync flex bison aria2
+        df -h
+        sudo curl --create-dirs -L -o /usr/local/bin/repo -O -L https://storage.googleapis.com/git-repo-downloads/repo
+        sudo chmod a+rx /usr/local/bin/repo
+        aria2c https://raw.githubusercontent.com/Hakimi0804/scripts/main/builds/mkpbrp_RMX2151.sh
+        aria2c https://raw.githubusercontent.com/Hakimi0804/scripts/main/builds/util.sh
+
+
+    - name: Sync source, device tree, build and upload
+      run: |
+        mkdir work
+        cd work
+        mv ../{mkpbrp_RMX2151.sh,util.sh} .
+        bash mkpbrp_RMX2151.sh
+        
